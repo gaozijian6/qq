@@ -95,16 +95,6 @@ function createHomeWindow(): void {
   homeWindow.on('ready-to-show', () => {
     homeWindow?.show()
   })
-
-  ipcMain.handle('move-home-window', (_, { mouseX, mouseY }) => {
-    const [x, y] = homeWindow?.getPosition() ?? [0, 0]
-    homeWindow?.setPosition(x + mouseX, y + mouseY)
-  })
-
-  ipcMain.handle('close-home-window', () => {
-    homeWindow?.close()
-    homeWindow = null
-  })
 }
 
 app.whenReady().then(() => {
@@ -114,9 +104,26 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  ipcMain.handle('move-window', (_, { mouseX, mouseY }) => {
-    const [x, y] = loginWindow?.getPosition() ?? [0, 0]
-    loginWindow?.setPosition(x + mouseX, y + mouseY)
+  ipcMain.handle('move-window', (_, { targetWindow, mouseX, mouseY }) => {
+    switch (targetWindow) {
+      case 'login': {
+        const [x, y] = loginWindow?.getPosition() ?? [0, 0]
+        loginWindow?.setPosition(x + mouseX, y + mouseY)
+        break
+      }
+      case 'register': {
+        const [x, y] = registerWindow?.getPosition() ?? [0, 0]
+        registerWindow?.setPosition(x + mouseX, y + mouseY)
+        break
+      }
+      case 'home': {
+        const [x, y] = homeWindow?.getPosition() ?? [0, 0]
+        homeWindow?.setPosition(x + mouseX, y + mouseY)
+        break
+      }
+      default:
+        break
+    }
   })
 
   ipcMain.handle('open-window', (_, targetWindow: string) => {
@@ -150,6 +157,10 @@ app.whenReady().then(() => {
       case 'register':
         registerWindow?.close()
         registerWindow = null
+        break
+      case 'home':
+        homeWindow?.close()
+        homeWindow = null
         break
       default:
         break

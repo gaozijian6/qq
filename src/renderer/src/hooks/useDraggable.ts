@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-export function useDraggable(url: string) {
+export function useDraggable(targetWindow: string) {
   const dragRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export function useDraggable(url: string) {
       if (!isDragging) return
       const mouseX = e.clientX - startX
       const mouseY = e.clientY - startY
-      window.electron.ipcRenderer.invoke(url, { mouseX, mouseY })
+      window.electron.ipcRenderer.invoke(`move-window`, { targetWindow, mouseX, mouseY })
     }
 
     const onMouseUp = () => {

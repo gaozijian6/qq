@@ -6,7 +6,7 @@ import Close from './Close'
 const { TabPane } = Tabs
 
 const HomePage: React.FC = () => {
-  const dragRef = useDraggable('move-home-window')
+  const dragRef = useDraggable('home')
   const [sign, setSign] = useState('啊啊撒大声地撒')
 
   return (

@@ -15,7 +15,7 @@ interface FormValues {
 
 const RegisterPage: React.FC = () => {
   const [form] = Form.useForm<FormValues>()
-  const dragRef = useDraggable('move-register-window')
+  const dragRef = useDraggable('register')
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [id, setId] = useState(0)
 

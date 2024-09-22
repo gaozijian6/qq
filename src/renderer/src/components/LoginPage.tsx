@@ -9,7 +9,7 @@ import Close from './Close';
 
 const LoginPage: React.FC = () => {
   const [form] = Form.useForm();
-  const dragRef = useDraggable('move-window');
+  const dragRef = useDraggable('login');
 
   const handleLogin = (values: any) => {
     Service.post('/login', values).then(response => {
@@ -61,7 +61,7 @@ const LoginPage: React.FC = () => {
                   style={{ fontSize: '14px', marginRight: '10px' }}
                   onClick={(e) => {
                     e.preventDefault();
-                    window.electron.ipcRenderer.invoke('open-register-window');
+                    window.electron.ipcRenderer.invoke('open-window', 'register');
                   }}
                 >
                   注册账号
