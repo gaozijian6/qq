@@ -45,9 +45,12 @@ const RegisterPage: React.FC = () => {
         <Form form={form} onFinish={handleRegister} style={{ width: '300px' }}>
           <Form.Item
             name="username"
-            rules={[{ required: true, message: '请输入用户名' }]}
+            rules={[
+              { required: true, message: '请输入用户名' },
+              { max: 10, message: '用户名不能超过10个字' }
+            ]}
           >
-            <Input prefix={<UserOutlined />} placeholder="用户名" />
+            <Input prefix={<UserOutlined />} placeholder="用户名（最多10个字）" />
           </Form.Item>
           <Form.Item
             name="email"
@@ -60,9 +63,12 @@ const RegisterPage: React.FC = () => {
           </Form.Item>
           <Form.Item
             name="password"
-            rules={[{ required: true, message: '请输入密码' }]}
+            rules={[
+              { required: true, message: '请输入密码' },
+              { min: 6, message: '密码至少6个字符' },
+            ]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="密码" />
+            <Input.Password prefix={<LockOutlined />} placeholder="密码（8-16个字符）" />
           </Form.Item>
           <Form.Item
             name="confirmPassword"

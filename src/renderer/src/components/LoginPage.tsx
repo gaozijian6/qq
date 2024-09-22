@@ -14,6 +14,8 @@ const LoginPage: React.FC = () => {
   const handleLogin = (values: any) => {
     Service.post('/login', values).then(response => {
       message.success(response.data?.message ?? '登录成功');
+      window.electron.ipcRenderer.invoke('open-window', 'home');
+      window.electron.ipcRenderer.invoke('close-window', 'login');
     }).catch(error => {
       message.error(error.response?.data?.message ?? '登录失败，请稍后重试');
     });
