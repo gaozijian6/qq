@@ -1,5 +1,5 @@
-import React from 'react'
-import { Form, Input, Button, Row, Col } from 'antd'
+import React, { useState } from 'react'
+import { Form, Input, Button, Row, Col, Modal } from 'antd'
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons'
 import { useDraggable } from '@/hooks/useDraggable'
 import Service from '@/service'
@@ -16,13 +16,21 @@ interface FormValues {
 const RegisterPage: React.FC = () => {
   const [form] = Form.useForm<FormValues>()
   const dragRef = useDraggable('move-register-window')
+  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [id, setId] = useState(0)
 
   const handleRegister = (values: FormValues) => {
     Service.post('/register', values).then(response => {
-      console.log(response.data);
+      setId(response.data.user.id)
+      setIsModalVisible(true)
     }).catch(error => {
-      console.error('注册失败:', error);
-    });
+      console.error('注册失败:', error)
+    })
+  }
+
+  const handleModalOk = () => {
+    setIsModalVisible(false)
+    window.electron.ipcRenderer.invoke('close-window', 'register')
   }
 
   return (
@@ -80,6 +88,16 @@ const RegisterPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Col>
+      <Modal
+        title="注册成功"
+        open={isModalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalOk}
+        okText="确认"
+        cancelText="取消"
+      >
+        <p>恭喜您，注册成功！您的id为：{id}</p>
+      </Modal>
     </Row>
   )
 }

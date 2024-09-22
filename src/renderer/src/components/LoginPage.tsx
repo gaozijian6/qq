@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Button, Avatar, Row, Col, Checkbox } from 'antd';
+import { Form, Input, Button, Avatar, Row, Col, Checkbox, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import qqLogo from '@/assets/qq.jpg';
 import { useDraggable } from '@/hooks/useDraggable';
@@ -12,11 +12,11 @@ const LoginPage: React.FC = () => {
   const dragRef = useDraggable('move-window');
 
   const handleLogin = (values: any) => {
-    // Service.post('/login', values).then(response => {
-    //   console.log(response.data);
-    // }).catch(error => {
-    //   console.error('登录失败:', error);
-    // });
+    Service.post('/login', values).then(response => {
+      message.success(response.data?.message ?? '登录成功');
+    }).catch(error => {
+      message.error(error.response?.data?.message ?? '登录失败，请稍后重试');
+    });
   };
 
 
@@ -36,7 +36,7 @@ const LoginPage: React.FC = () => {
         />
         <Form form={form} onFinish={handleLogin} style={{ width: '300px' }}>
           <Form.Item
-            name="username"
+            name="id"
             rules={[{ required: true, message: '请输入您的QQ号码' }]}
           >
             <Input prefix={<UserOutlined />} placeholder="QQ号码" />

@@ -1,55 +1,53 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
+	"qq-server/routes"
+
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-type User struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+var db *sql.DB
+
+func initDB() {
+	var err error
+	db, err = sql.Open("mysql", "root:123456@tcp(127.0.0.1:3306)/qq")
+	if err != nil {
+		panic(err)
+	}
+
+	if err = db.Ping(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("成功连接到MySQL数据库")
 }
 
 func SetupRoutes(app *fiber.App) {
 	app.Use(cors.New())
-
 	app.Post("/register", func(c *fiber.Ctx) error {
-		user := new(User)
-
-		if err := c.BodyParser(user); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"success": false,
-				"message": "无效的请求数据",
-			})
-		}
-
-		return c.JSON(fiber.Map{
-			"success": true,
-			"message": "用户注册成功",
-			"user":    user,
-		})
+		return routes.RegisterRoute(c, db)
+	})
+	app.Post("/login", func(c *fiber.Ctx) error {
+		return routes.LoginRoute(c, db)
 	})
 }
 
-func StartServer() {
-	app := fiber.New()
-
-	SetupRoutes(app)
-
-	err := app.Listen(":3000")
-	if err != nil {
-		panic(err)
-	}
-}
-
 func main() {
+	initDB()
+	defer db.Close()
+
 	app := fiber.New()
 
 	SetupRoutes(app)
 
+	fmt.Println("服务器正在启动，监听端口 3000...")
 	err := app.Listen(":3000")
 	if err != nil {
+		fmt.Printf("服务器启动失败: %v\n", err)
 		panic(err)
 	}
 }
