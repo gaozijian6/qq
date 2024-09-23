@@ -20,5 +20,6 @@
   "prettier.semi": false,
   "prettier.singleQuote": true,
   "prettier.bracketSpacing": true,
-  "prettier.trailingComma": "es5"
+  "prettier.trailingComma": "es5",
+  "liveServer.settings.port": 5501
 }

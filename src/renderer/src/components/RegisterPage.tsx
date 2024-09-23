@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { Form, Input, Button, Row, Col, Modal } from 'antd'
+import { Form, Input, Button, Row, Col, Modal, Avatar } from 'antd'
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons'
 import { useDraggable } from '@/hooks/useDraggable'
 import Service from '@/service'
 import Close from './Close'
-import './gradientBG.less';
+import './gradientBG.less'
 
 interface FormValues {
   username: string
@@ -18,14 +18,17 @@ const RegisterPage: React.FC = () => {
   const dragRef = useDraggable('register')
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [id, setId] = useState(0)
+  const [avatar, setAvatar] = useState('http://127.0.0.1:9000/avatar/qq.png')
 
   const handleRegister = (values: FormValues) => {
-    Service.post('/register', values).then(response => {
-      setId(response.data.user.id)
-      setIsModalVisible(true)
-    }).catch(error => {
-      console.error('注册失败:', error)
-    })
+    Service.post('/register', values)
+      .then((response) => {
+        setId(response.data.user.id)
+        setIsModalVisible(true)
+      })
+      .catch((error) => {
+        console.error('注册失败:', error)
+      })
   }
 
   const handleModalOk = () => {
@@ -34,15 +37,13 @@ const RegisterPage: React.FC = () => {
   }
 
   return (
-    <Row 
-      justify="center" 
-      align="middle" 
-      className="background"
-      ref={dragRef}
-    >
+    <Row justify="center" align="middle" className="background" ref={dragRef}>
       <Close targetWindow="register" />
       <Col>
         <Form form={form} onFinish={handleRegister} style={{ width: '300px' }}>
+          <Form.Item name="avatar_url" initialValue={avatar} style={{ display: 'none' }}>
+            <Input value={avatar}/>
+          </Form.Item>
           <Form.Item
             name="username"
             rules={[
@@ -56,7 +57,10 @@ const RegisterPage: React.FC = () => {
             name="email"
             rules={[
               { required: true, message: '请输入邮箱' },
-              { pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: '请输入有效的邮箱地址' }
+              {
+                pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                message: '请输入有效的邮箱地址'
+              }
             ]}
           >
             <Input prefix={<MailOutlined />} placeholder="邮箱" />
@@ -65,7 +69,7 @@ const RegisterPage: React.FC = () => {
             name="password"
             rules={[
               { required: true, message: '请输入密码' },
-              { min: 6, message: '密码至少6个字符' },
+              { min: 6, message: '密码至少6个字符' }
             ]}
           >
             <Input.Password prefix={<LockOutlined />} placeholder="密码（8-16个字符）" />
@@ -81,8 +85,8 @@ const RegisterPage: React.FC = () => {
                     return Promise.resolve()
                   }
                   return Promise.reject(new Error('两次输入的密码不一致'))
-                },
-              }),
+                }
+              })
             ]}
           >
             <Input.Password prefix={<LockOutlined />} placeholder="确认密码" />

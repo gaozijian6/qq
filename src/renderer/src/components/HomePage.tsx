@@ -7,7 +7,8 @@ const { TabPane } = Tabs
 
 const HomePage: React.FC = () => {
   const dragRef = useDraggable('home')
-  const [sign, setSign] = useState('啊啊撒大声地撒')
+  const [introduction, setIntroduction] = useState('啊啊撒大声地撒')
+  const [username, setUsername] = useState('啊啊撒大声地撒')
 
   return (
     <div
@@ -32,12 +33,12 @@ const HomePage: React.FC = () => {
         <Col flex="1" style={{ width: 'calc(100% - 50px)' }}>
           <Row>
             <Col span={24} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '16px', fontWeight: 'bold' }}>
-              阿萨德as asdsad asd saasdadasdasd
+              {username}
             </Col>
           </Row>
           <Row>
             <Col span={24} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>
-              {sign}
+              {introduction}
             </Col>
           </Row>
         </Col>

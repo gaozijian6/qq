@@ -1,12 +1,11 @@
 import React from 'react';
 import { Form, Input, Button, Avatar, Row, Col, Checkbox, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import qqLogo from '@/assets/qq.jpg';
 import { useDraggable } from '@/hooks/useDraggable';
 import './gradientBG.less';
 import Service from '@/service';
 import Close from './Close';
-
+import { INIT_AVATAR_URL } from '@/constants';
 const LoginPage: React.FC = () => {
   const [form] = Form.useForm();
   const dragRef = useDraggable('login');
@@ -14,13 +13,16 @@ const LoginPage: React.FC = () => {
   const handleLogin = (values: any) => {
     Service.post('/login', values).then(response => {
       message.success(response.data?.message ?? '登录成功');
+      const token = response.data?.token;
+      if (token) {
+        localStorage.setItem('token', token);
+      }
       window.electron.ipcRenderer.invoke('open-window', 'home');
       window.electron.ipcRenderer.invoke('close-window', 'login');
     }).catch(error => {
       message.error(error.response?.data?.message ?? '登录失败，请稍后重试');
     });
   };
-
 
   return (
     <Row 
@@ -32,9 +34,10 @@ const LoginPage: React.FC = () => {
       <Close targetWindow="login" />
       <Col>
         <Avatar 
-          src={qqLogo} 
+          src={INIT_AVATAR_URL} 
           size={64} 
-          style={{ marginBottom: '20px', display: 'block', margin: '0 auto' }} 
+          style={{ marginBottom: '20px', display: 'block', margin: '0 auto' }}
+          onError={() => { console.error('头像加载失败', INIT_AVATAR_URL); return false; }}
         />
         <Form form={form} onFinish={handleLogin} style={{ width: '300px' }}>
           <Form.Item
