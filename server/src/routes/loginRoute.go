@@ -2,15 +2,21 @@ package routes
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type loginUser struct {
-	ID       string `json:"id"`
-	Password string `json:"password"`
-	Remember bool   `json:"remember"`
+	ID           string `json:"id"`
+	Password     string `json:"password"`
+	Remember     bool   `json:"remember"`
+	Introduction string `json:"introduction"`
+	Avatar       string `json:"avatar"`
 }
+
+var jwtSecret = []byte("your_secret_key")
 
 func LoginRoute(c *fiber.Ctx, db *sql.DB) error {
 	user := new(loginUser)
@@ -55,25 +61,31 @@ func LoginRoute(c *fiber.Ctx, db *sql.DB) error {
 		})
 	}
 
-	// 更新用户表中的remember字段
-	if user.Remember {
-		_, err = db.Exec("UPDATE users SET remember = ? WHERE id = ?", user.Remember, user.ID)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"success": false,
-				"message": "更新remember字段时发生错误",
-				"error":   err.Error(),
-			})
-		}
+	// 生成JWT
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID": userID,
+		"exp":    time.Now().Add(time.Hour * 72).Unix(),
+	})
+
+	tokenString, err := token.SignedString(jwtSecret)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "生成JWT时发生错误",
+			"error":   err.Error(),
+		})
 	}
 
 	// 登录成功
 	return c.JSON(fiber.Map{
 		"success": true,
 		"message": "登录成功",
+		"token":   tokenString,
 		"user": fiber.Map{
-			"id":       userID,
-			"username": user.ID,
+			"id":           userID,
+			"username":     user.ID,
+			"introduction": user.Introduction,
+			"avatar":       user.Avatar,
 		},
 	})
 }

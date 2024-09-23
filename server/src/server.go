@@ -28,12 +28,17 @@ func initDB() {
 
 func SetupRoutes(app *fiber.App) {
 	app.Use(cors.New())
+	app.Use(func(c *fiber.Ctx) error {
+		c.Set("Content-Security-Policy", "default-src 'self'; img-src 'self' http://127.0.0.1:9000")
+		return c.Next()
+	})
 	app.Post("/register", func(c *fiber.Ctx) error {
 		return routes.RegisterRoute(c, db)
 	})
 	app.Post("/login", func(c *fiber.Ctx) error {
 		return routes.LoginRoute(c, db)
 	})
+	app.Use(routes.ProtectedRoute) // 保护以下路由
 }
 
 func main() {
