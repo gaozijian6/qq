@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Avatar, Col, Input, Row, Tabs } from 'antd'
 import { useDraggable } from '@/hooks/useDraggable'
 import Close from './Close'
@@ -7,8 +7,15 @@ const { TabPane } = Tabs
 
 const HomePage: React.FC = () => {
   const dragRef = useDraggable('home')
-  const [introduction, setIntroduction] = useState('啊啊撒大声地撒')
-  const [username, setUsername] = useState('啊啊撒大声地撒')
+  const [introduction, setIntroduction] = useState('')
+  const [username, setUsername] = useState('')
+
+  useEffect(() => {
+    window.electron.ipcRenderer.on('login-home', (_, data) => {
+      setIntroduction(data.introduction)
+      setUsername(data.username)
+    })
+  }, [])
 
   return (
     <div

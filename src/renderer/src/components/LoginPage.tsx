@@ -6,6 +6,7 @@ import './gradientBG.less';
 import Service from '@/service';
 import Close from './Close';
 import { INIT_AVATAR_URL } from '@/constants';
+
 const LoginPage: React.FC = () => {
   const [form] = Form.useForm();
   const dragRef = useDraggable('login');
@@ -17,7 +18,8 @@ const LoginPage: React.FC = () => {
       if (token) {
         localStorage.setItem('token', token);
       }
-      window.electron.ipcRenderer.invoke('open-window', 'home');
+      // 发送数据到主进程
+      window.electron.ipcRenderer.invoke('open-window', { windowName: 'home', data: response.data.user });
       window.electron.ipcRenderer.invoke('close-window', 'login');
     }).catch(error => {
       message.error(error.response?.data?.message ?? '登录失败，请稍后重试');

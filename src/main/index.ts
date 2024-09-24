@@ -19,7 +19,8 @@ function createLoginWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      webSecurity: false
     }
   })
 
@@ -70,7 +71,7 @@ function createRegisterWindow(): void {
   })
 }
 
-function createHomeWindow(): void {
+function createHomeWindow(data): void {
   homeWindow = new BrowserWindow({
     width: 300,
     minWidth: 250,
@@ -94,6 +95,7 @@ function createHomeWindow(): void {
 
   homeWindow.on('ready-to-show', () => {
     homeWindow?.show()
+    homeWindow?.webContents.send('login-home', data)
   })
 }
 
@@ -126,8 +128,8 @@ app.whenReady().then(() => {
     }
   })
 
-  ipcMain.handle('open-window', (_, targetWindow: string) => {
-    switch (targetWindow) {
+  ipcMain.handle('open-window', (_, { windowName, data }) => {
+    switch (windowName) {
       case 'login':
         createLoginWindow()
         break
@@ -139,7 +141,7 @@ app.whenReady().then(() => {
         }
         break
       case 'home':
-        createHomeWindow()
+        createHomeWindow(data)
         break
       default:
         break

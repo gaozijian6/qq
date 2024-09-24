@@ -5,6 +5,7 @@ import { useDraggable } from '@/hooks/useDraggable'
 import Service from '@/service'
 import Close from './Close'
 import './gradientBG.less'
+import { INIT_AVATAR_URL } from '@/constants'
 
 interface FormValues {
   username: string
@@ -18,7 +19,7 @@ const RegisterPage: React.FC = () => {
   const dragRef = useDraggable('register')
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [id, setId] = useState(0)
-  const [avatar, setAvatar] = useState('http://127.0.0.1:9000/avatar/qq.png')
+  const [avatar, setAvatar] = useState(INIT_AVATAR_URL)
 
   const handleRegister = (values: FormValues) => {
     Service.post('/register', values)
@@ -41,7 +42,7 @@ const RegisterPage: React.FC = () => {
       <Close targetWindow="register" />
       <Col>
         <Form form={form} onFinish={handleRegister} style={{ width: '300px' }}>
-          <Form.Item name="avatar_url" initialValue={avatar} style={{ display: 'none' }}>
+          <Form.Item name="avatar" initialValue={avatar} style={{ display: 'none' }}>
             <Input value={avatar}/>
           </Form.Item>
           <Form.Item

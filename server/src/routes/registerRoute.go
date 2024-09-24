@@ -13,7 +13,7 @@ type registerUser struct {
 	Password        string `json:"password"`
 	ConfirmPassword string `json:"confirmPassword"`
 	Remember        bool   `json:"remember"`
-	AvatarUrl       string `json:"avatar-url"`
+	Avatar          string `json:"avatar"`
 }
 
 func RegisterRoute(c *fiber.Ctx, db *sql.DB) error {
@@ -59,8 +59,8 @@ func RegisterRoute(c *fiber.Ctx, db *sql.DB) error {
 	}
 
 	// 插入用户数据
-	result, err := db.Exec("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-		user.Username, user.Email, user.Password)
+	result, err := db.Exec("INSERT INTO users (username, email, password, avatar) VALUES (?, ?, ?, ?)",
+		user.Username, user.Email, user.Password, user.Avatar)
 	if err != nil {
 		fmt.Printf("数据库错误: %v\n", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

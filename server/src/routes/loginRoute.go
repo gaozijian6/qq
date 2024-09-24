@@ -12,6 +12,7 @@ type loginUser struct {
 	ID           string `json:"id"`
 	Password     string `json:"password"`
 	Remember     bool   `json:"remember"`
+	Username     string `json:"username"`
 	Introduction string `json:"introduction"`
 	Avatar       string `json:"avatar"`
 }
@@ -39,7 +40,7 @@ func LoginRoute(c *fiber.Ctx, db *sql.DB) error {
 	// 检查用户ID是否存在并验证密码
 	var storedPassword string
 	var userID int64
-	err := db.QueryRow("SELECT id, password FROM users WHERE id = ?", user.ID).Scan(&userID, &storedPassword)
+	err := db.QueryRow("SELECT id, password, username, introduction, avatar FROM users WHERE id = ?", user.ID).Scan(&userID, &storedPassword, &user.Username, &user.Introduction, &user.Avatar)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -83,7 +84,7 @@ func LoginRoute(c *fiber.Ctx, db *sql.DB) error {
 		"token":   tokenString,
 		"user": fiber.Map{
 			"id":           userID,
-			"username":     user.ID,
+			"username":     user.Username,
 			"introduction": user.Introduction,
 			"avatar":       user.Avatar,
 		},
