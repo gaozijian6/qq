@@ -11,6 +11,7 @@ import (
 )
 
 var db *sql.DB
+var jwtSecret = []byte("your-secret-key")
 
 func initDB() {
 	var err error
@@ -36,9 +37,14 @@ func SetupRoutes(app *fiber.App) {
 		return routes.RegisterRoute(c, db)
 	})
 	app.Post("/login", func(c *fiber.Ctx) error {
-		return routes.LoginRoute(c, db)
+		return routes.LoginRoute(c, db, jwtSecret)
 	})
-	app.Use(routes.ProtectedRoute) // 保护以下路由
+	app.Use(func(c *fiber.Ctx) error {
+		return routes.ProtectedRoute(c, jwtSecret)
+	})
+	app.Get("/user/info", func(c *fiber.Ctx) error {
+		return routes.UserInfoRoute(c, db, jwtSecret)
+	})
 }
 
 func main() {

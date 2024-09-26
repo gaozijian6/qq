@@ -17,9 +17,7 @@ type loginUser struct {
 	Avatar       string `json:"avatar"`
 }
 
-var jwtSecret = []byte("your_secret_key")
-
-func LoginRoute(c *fiber.Ctx, db *sql.DB) error {
+func LoginRoute(c *fiber.Ctx, db *sql.DB, jwtSecret []byte) error {
 	user := new(loginUser)
 
 	if err := c.BodyParser(user); err != nil {

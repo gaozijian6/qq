@@ -1,103 +1,11 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import { electronApp, optimizer } from '@electron-toolkit/utils'
+import createWindow from '../renderer/src/tools/creatWindow'
 
 let loginWindow: BrowserWindow | null = null
 let registerWindow: BrowserWindow | null = null
 let homeWindow: BrowserWindow | null = null
-
-function createLoginWindow(): void {
-  // Create the browser window.
-  loginWindow = new BrowserWindow({
-    width: 450,
-    height: 340,
-    show: false,
-    autoHideMenuBar: true,
-    frame: false, // 去掉窗口框架
-    resizable: false, // 禁止调整窗口大小
-    ...(process.platform === 'linux' ? { icon } : {}),
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false,
-      webSecurity: false
-    }
-  })
-
-  loginWindow.on('ready-to-show', () => {
-    loginWindow?.show()
-  })
-
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    loginWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    loginWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-}
-
-function createRegisterWindow(): void {
-  registerWindow = new BrowserWindow({
-    width: 450,
-    height: 400,
-    show: false,
-    autoHideMenuBar: true,
-    frame: false,
-    resizable: false,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
-    }
-  })
-
-  registerWindow.loadURL(
-    is.dev && process.env['ELECTRON_RENDERER_URL']
-      ? `${process.env['ELECTRON_RENDERER_URL']}/#/register`
-      : `file://${join(__dirname, '../renderer/index.html')}#register`
-  )
-
-  registerWindow.on('ready-to-show', () => {
-    registerWindow?.show()
-  })
-
-  ipcMain.handle('move-register-window', (_, { mouseX, mouseY }) => {
-    const [x, y] = registerWindow?.getPosition() ?? [0, 0]
-    registerWindow?.setPosition(x + mouseX, y + mouseY)
-  })
-
-  registerWindow.on('closed', () => {
-    // 清理引用
-    loginWindow?.focus()
-    ipcMain.removeHandler('move-register-window')
-  })
-}
-
-function createHomeWindow(data): void {
-  homeWindow = new BrowserWindow({
-    width: 300,
-    minWidth: 250,
-    height: 700,
-    minHeight: 500,
-    show: false,
-    autoHideMenuBar: true,
-    frame: false,
-    resizable: true,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
-    }
-  })
-
-  homeWindow.loadURL(
-    is.dev && process.env['ELECTRON_RENDERER_URL']
-      ? `${process.env['ELECTRON_RENDERER_URL']}/#/home`
-      : `file://${join(__dirname, '../renderer/index.html')}#home`
-  )
-
-  homeWindow.on('ready-to-show', () => {
-    homeWindow?.show()
-    homeWindow?.webContents.send('login-home', data)
-  })
-}
+let friendWindow: BrowserWindow | null = null
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
@@ -131,17 +39,23 @@ app.whenReady().then(() => {
   ipcMain.handle('open-window', (_, { windowName, data }) => {
     switch (windowName) {
       case 'login':
-        createLoginWindow()
+        loginWindow = createWindow(450, 340, 'login')
         break
       case 'register':
         if (registerWindow) {
           registerWindow.focus()
         } else {
-          createRegisterWindow()
+          registerWindow = createWindow(450, 340, 'register')
         }
         break
       case 'home':
-        createHomeWindow(data)
+        homeWindow = createWindow(300, 700, 'home')
+        homeWindow?.once('ready-to-show', () => {
+          homeWindow?.webContents.send('login-home', data)
+        })
+        break
+      case 'friend':
+        friendWindow = createWindow(450, 400, 'friend')
         break
       default:
         break
@@ -153,26 +67,27 @@ app.whenReady().then(() => {
       case 'login':
         loginWindow?.close()
         registerWindow?.close()
-        loginWindow = null
-        registerWindow = null
         break
       case 'register':
         registerWindow?.close()
-        registerWindow = null
         break
       case 'home':
         homeWindow?.close()
-        homeWindow = null
+        break
+      case 'friend':
+        friendWindow?.close()
         break
       default:
         break
     }
   })
 
-  createLoginWindow()
+  loginWindow = createWindow(450, 340, 'login')
 
   app.on('activate', function () {
-    if (BrowserWindow.getAllWindows().length === 0) createLoginWindow()
+    if (BrowserWindow.getAllWindows().length === 0) {
+      loginWindow = createWindow(450, 340, 'login')
+    }
   })
 })
 
