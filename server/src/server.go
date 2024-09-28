@@ -45,6 +45,9 @@ func SetupRoutes(app *fiber.App) {
 	app.Get("/user/info", func(c *fiber.Ctx) error {
 		return routes.UserInfoRoute(c, db, jwtSecret)
 	})
+	app.Post("/findFriend", func(c *fiber.Ctx) error {
+		return routes.FindFriendRoute(c, db)
+	})
 }
 
 func main() {

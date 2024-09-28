@@ -15,3 +15,7 @@ export function register(params) {
 export function login(params) {
   return instance.post('/login', params)
 }
+
+export function findFriend(params) {
+  return instance.post('/findFriend', params)
+}

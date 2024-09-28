@@ -5,53 +5,37 @@ import Close from '@/components/Close'
 import '@/components/gradientBG.less'
 import { useDraggable } from '@/tools/useDraggable'
 
-const AddFriend: React.FC = () => {
-  const [friendId, setFriendId] = useState('')
-  const dragRef = useDraggable('friend')
-  const [form] = Form.useForm()
+interface Friend {
+  id: string
+  avatar: string
+  username: string
+}
 
-  const handleAddFriend = () => {
-    if (!friendId) {
+const AddFriend: React.FC = () => {
+  const [value, setValue] = useState('')
+  const dragRef = useDraggable('friend')
+  const [friendList, setFriendList] = useState<Friend[]>([])
+
+  const handleFindFriend = () => {
+    if (!value) {
       message.error('请输入好友ID或用户名')
       return
     }
 
-    Service.post('/add-friend', { friendId })
-      .then((response) => {
-        message.success(response.data.message)
-        setFriendId('')
-      })
-      .catch((error) => {
-        message.error(error.response?.data?.message ?? '添加好友失败，请稍后重试')
+    Service.findFriend({ value: value.trim() })
+      .then((res) => {
+        setFriendList(res.data.users)
+        if (res.data.users.length === 0) {
+          message.error(res.data.message)
+        }else{
+          message.success(res.data.message)
+        }
       })
   }
 
-  const friendList = [
-    {
-      id: 1,
-      name: '张三',
-      avatar: 'https://avatars.githubusercontent.com/u/1032474?v=4'
-    },
-    {
-      id: 2,
-      name: '李四',
-      avatar: 'https://avatars.githubusercontent.com/u/1032474?v=4'
-    },
-    {
-      id: 3,
-      name: '王五',
-      avatar: 'https://avatars.githubusercontent.com/u/1032474?v=4'
-    },
-    {
-      id: 4,
-      name: '赵六',
-      avatar: 'https://avatars.githubusercontent.com/u/1032474?v=4'
-    },
-  ]
-
   return (
     <>
-      <Close targetWindow="friend" />
+      <Close windowName="friend" />
       <Row style={{ height: '50px',padding:'10px',textAlign: 'left', fontSize: '20px', fontWeight: 'bold',color:'white',cursor:'default' }} ref={dragRef} className='background'>
         查找好友
       </Row>
@@ -59,28 +43,34 @@ const AddFriend: React.FC = () => {
         <Col span={12}>
           <Input
             placeholder="输入好友ID或用户名"
-            value={friendId}
-            onChange={(e) => setFriendId(e.target.value)}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
             style={{ marginBottom: '10px' }}
           />
         </Col>
         <Col span={12}>
-          <Button type="primary" onClick={handleAddFriend}>查找</Button>
+          <Button type="primary" onClick={handleFindFriend}>查找</Button>
         </Col>
         <Col span={24}>
-          <Row gutter={[16, 16]} style={{ overflowY: 'auto', height: '100%', maxHeight: 'calc(100vh - 150px)' }}>
-            {friendList.map((friend) => (
-              <Col key={friend.id} span={6} >
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px', border: '1px solid #e8e8e8', borderRadius: '4px', height: '100%' }}>
-                  <Avatar src={friend.avatar} size={64} style={{ marginBottom: '12px' }} />
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontWeight: 'bold' }}>{friend.name}</div>
-                    <Button type="primary" style={{ marginTop: '12px' }}>添加好友</Button>
+          {friendList.length === 0 ? (
+            <div style={{ textAlign: 'center', width: '100%', padding: '20px' }}>
+              没有搜索到相关结果
+            </div>
+          ) : (
+            <Row gutter={[16, 16]} style={{ overflowY: 'auto', height: '100%', maxHeight: 'calc(100vh - 150px)' }}>
+              {friendList.map((friend) => (
+                <Col key={friend.id} span={6} >
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px', border: '1px solid #e8e8e8', borderRadius: '4px', height: '100%' }}>
+                    <Avatar src={friend.avatar} size={64} style={{ marginBottom: '12px' }} />
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontWeight: 'bold' }}>{friend.username}</div>
+                      <Button type="primary" style={{ marginTop: '12px' }}>添加好友</Button>
+                    </div>
                   </div>
-                </div>
-              </Col>
-            ))}
-          </Row>
+                </Col>
+              ))}
+            </Row>
+          )}
         </Col>
       </Row>
     </>
