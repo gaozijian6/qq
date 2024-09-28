@@ -5,19 +5,20 @@ import Close from '../../components/Close'
 import MessageList from './MessageList'
 import ContactList from './ContactList'
 import { INIT_AVATAR_URL, INIT_INTRODUCTION } from '@/constants'
-import Service from '@/service'
+import * as Service from '@/service'
 
+import './index.less'
 const HomePage: React.FC = () => {
   const dragRef = useDraggable('home')
   const [introduction, setIntroduction] = useState('')
   const [username, setUsername] = useState('')
   const [activeTab, setActiveTab] = useState('1')
   const [avatar, setAvatar] = useState('')
+  const [isEditingIntro, setIsEditingIntro] = useState(false)
 
   useEffect(() => {
     window.electron.ipcRenderer.on('login-home', (_, data) => {
       const { introduction, username, avatar } = data
-      console.log(data)
       setIntroduction(introduction)
       setUsername(username)
       setAvatar(avatar || INIT_AVATAR_URL)
@@ -26,7 +27,13 @@ const HomePage: React.FC = () => {
   }, [])
  
   function refreshData() {
-    Service.get('/user/info').then((res) => {
+    // Service.get('/user/info').then((res) => {
+    //   const { introduction, username, avatar } = res.data.user ?? {}
+    //   setIntroduction(introduction || INIT_INTRODUCTION)
+    //   setUsername(username)
+    //   setAvatar(avatar || INIT_AVATAR_URL)
+    // })
+    Service.getUserInfo().then((res) => {
       const { introduction, username, avatar } = res.data.user ?? {}
       setIntroduction(introduction || INIT_INTRODUCTION)
       setUsername(username)
@@ -37,6 +44,15 @@ const HomePage: React.FC = () => {
   const handleAddFriend = () => {
     window.electron.ipcRenderer.invoke('open-window', { windowName: 'friend', data: {} })
   }
+
+  const handleIntroChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIntroduction(e.target.value);
+  };
+
+  const handleIntroBlur = () => {
+    setIsEditingIntro(false);
+    // 这里可以添加保存简介的逻辑
+  };
 
   return (
     <div
@@ -76,15 +92,27 @@ const HomePage: React.FC = () => {
           <Row>
             <Col
               span={24}
+              onClick={() => setIsEditingIntro(true)}
               style={{
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
                 fontSize: '14px',
-                color: 'rgba(255, 255, 255, 0.8)'
+                color: 'rgba(255, 255, 255, 0.8)',
+                padding: '1px'
               }}
             >
-              {introduction}
+              {isEditingIntro ? (
+                <Input
+                  value={introduction}
+                  onChange={handleIntroChange}
+                  onBlur={handleIntroBlur}
+                  autoFocus
+                  style={{ color: 'black',height: '20px',border: 'none' }}
+                />
+              ) : (
+                <span className="introduction">{introduction}</span>
+              )}
             </Col>
           </Row>
         </Col>

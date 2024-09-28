@@ -17,6 +17,6 @@ export default defineConfig({
     },
     plugins: [react()],
     publicDir: 'public',
-    assetsInclude: ['**/*.jpg', '**/*.png'],
+    assetsInclude: ['**/*.jpg', '**/*.png']
   }
 })

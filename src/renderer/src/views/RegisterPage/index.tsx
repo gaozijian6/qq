@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Form, Input, Button, Row, Col, Modal } from 'antd'
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons'
 import { useDraggable } from '@/tools/useDraggable'
-import Service from '@/service'
+import * as Service from '@/service'
 import Close from '@/components/Close'
 import '@/components/gradientBG.less'
 import { INIT_AVATAR_URL } from '@/constants'
@@ -22,7 +22,7 @@ const RegisterPage: React.FC = () => {
   const [avatar] = useState(INIT_AVATAR_URL)
 
   const handleRegister = (values: FormValues) => {
-    Service.post('/register', values)
+    Service.register(values)
       .then((response) => {
         setId(response.data.user.id)
         setIsModalVisible(true)
@@ -39,7 +39,7 @@ const RegisterPage: React.FC = () => {
 
   return (
     <Row justify="center" align="middle" className="background" ref={dragRef}>
-      <Close targetWindow="register" />
+      <Close windowName="register" />
       <Col>
         <Form form={form} onFinish={handleRegister} style={{ width: '300px' }}>
           <Form.Item name="avatar" initialValue={avatar} style={{ display: 'none' }}>

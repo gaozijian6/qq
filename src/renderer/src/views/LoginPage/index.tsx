@@ -3,24 +3,24 @@ import { Form, Input, Button, Avatar, Row, Col, Checkbox, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useDraggable } from '@/tools/useDraggable';
 import '@/components/gradientBG.less';
-import Service from '@/service';
+import * as Service from '@/service';
 import Close from '@/components/Close';
-import { INIT_AVATAR_URL } from '@/constants';
+import { INIT_AVATAR_URL, LOGIN, HOME } from '@/constants';
 
 const LoginPage: React.FC = () => {
   const [form] = Form.useForm();
   const dragRef = useDraggable('login');
 
   const handleLogin = (values: any) => {
-    Service.post('/login', values).then(response => {
+    Service.login(values).then(response => {
       message.success(response.data?.message ?? '登录成功');
       const token = response.data?.token;
       if (token) {
         localStorage.setItem('token', token);
       }
       // 发送数据到主进程
-      window.electron.ipcRenderer.invoke('open-window', { windowName: 'home', data: response.data.user });
-      window.electron.ipcRenderer.invoke('close-window', 'login');
+      window.electron.ipcRenderer.invoke('open-window', { windowName: HOME, data: response.data.user });
+      window.electron.ipcRenderer.invoke('close-window', LOGIN);
     }).catch(error => {
       message.error(error.response?.data?.message ?? '登录失败，请稍后重试');
     });
@@ -33,7 +33,7 @@ const LoginPage: React.FC = () => {
       className="background"
       ref={dragRef}
     >
-      <Close targetWindow="login" />
+      <Close windowName="login" />
       <Col>
         <Avatar 
           src={INIT_AVATAR_URL} 

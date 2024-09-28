@@ -2,10 +2,10 @@ import React from 'react';
 import { CloseOutlined } from '@ant-design/icons';
 
 interface CloseProps {
-  targetWindow: string
+  windowName: string
 }
 
-const Close: React.FC<CloseProps> = ({ targetWindow }) => {
+const Close: React.FC<CloseProps> = ({ windowName }) => {
   return (
     <div
       style={{
@@ -16,7 +16,7 @@ const Close: React.FC<CloseProps> = ({ targetWindow }) => {
         zIndex: 1000
       }}
       onClick={() => {
-        window.electron.ipcRenderer.invoke('close-window', targetWindow)
+        window.electron.ipcRenderer.invoke('close-window', windowName)
       }}
     >
       <CloseOutlined style={{ fontSize: '16px', color: '#fff' }} />

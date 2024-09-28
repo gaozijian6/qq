@@ -1,21 +1,17 @@
-import axios from 'axios'
+import instance from './instance'
 
-const Service = axios.create({
-  baseURL: 'http://localhost:3000',
-  timeout: 5000
-})
+export function getUserInfo() {
+  return instance.get('/user/info')
+}
 
-Service.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
+export function updateUserInfo(params) {
+  return instance.post('/user/update', params)
+}
 
-export default Service
+export function register(params) {
+  return instance.post('/register', params)
+}
+
+export function login(params) {
+  return instance.post('/login', params)
+}
