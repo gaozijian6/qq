@@ -2,6 +2,7 @@ package routes
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,12 +21,16 @@ type loginUser struct {
 func LoginRoute(c *fiber.Ctx, db *sql.DB, jwtSecret []byte) error {
 	user := new(loginUser)
 
+	id := c.FormValue("id")
+	fmt.Println("id", id)
+
 	if err := c.BodyParser(user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "无效的请求数据",
 		})
 	}
+	fmt.Println("user", user)
 
 	// 检查必填字段
 	if user.ID == "" || user.Password == "" {

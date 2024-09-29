@@ -2,7 +2,7 @@ import { is } from '@electron-toolkit/utils'
 import { BrowserWindow } from 'electron'
 import { join } from 'path'
 import electronWindow from './ElectronWindow'
-import { WINDOW, HOME } from '../renderer/src/constants'
+import { WINDOW, HOME, FRIEND } from '../renderer/src/constants'
 
 export default function createWindow(windowName: string, data?: any): BrowserWindow {
   const { width, height, resizable, minWidth, minHeight } = WINDOW[windowName]
@@ -28,8 +28,13 @@ export default function createWindow(windowName: string, data?: any): BrowserWin
 
   window.on('ready-to-show', () => {
     window?.show()
-    if (windowName === HOME) {
-      window?.webContents.send('login-home', data)
+    switch (windowName) {
+      case HOME:
+        window?.webContents.send('login-home', data)
+        break
+      case FRIEND:
+        window?.webContents.send('home-friend', data)
+        break
     }
   })
 
@@ -41,6 +46,7 @@ export default function createWindow(windowName: string, data?: any): BrowserWin
 
   window.on('closed', () => {
     window = null
+    electronWindow.delete(windowName)
   })
 
   return window

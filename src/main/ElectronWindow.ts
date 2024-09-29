@@ -1,6 +1,6 @@
 class ElectronWindow {
   static instance: ElectronWindow | null = null
-  map = {}
+  map = new Map()
 
   constructor() {
     if (ElectronWindow.instance) {
@@ -10,14 +10,18 @@ class ElectronWindow {
   }
 
   add(name, instance) {
-    if (this.map[name]) {
+    if (this.map.has(name)) {
       return
     }
-    this.map[name] = instance
+    this.map.set(name, instance)
   }
 
   get(name) {
-    return this.map[name]
+    return this.map.get(name)
+  }
+
+  delete(name) {
+    this.map.delete(name)
   }
 
   static getInstance() {

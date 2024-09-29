@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Input, Button, message, Row, Col, Form, Avatar } from 'antd'
+import React, { useState, useEffect } from 'react'
+import { Input, Button, message, Row, Col, Form, Avatar, Typography, Card } from 'antd'
 import * as Service from '@/service'
 import Close from '@/components/Close'
 import '@/components/gradientBG.less'
@@ -15,6 +15,12 @@ const AddFriend: React.FC = () => {
   const [value, setValue] = useState('')
   const dragRef = useDraggable('friend')
   const [friendList, setFriendList] = useState<Friend[]>([])
+  const [id, setId] = useState('')
+  useEffect(() => {
+    window.electron.ipcRenderer.on('home-friend', (_, data) => {
+      setId(data.id)
+    })
+  }, [])
 
   const handleFindFriend = () => {
     if (!value) {
@@ -22,21 +28,41 @@ const AddFriend: React.FC = () => {
       return
     }
 
-    Service.findFriend({ value: value.trim() })
-      .then((res) => {
-        setFriendList(res.data.users)
-        if (res.data.users.length === 0) {
-          message.error(res.data.message)
-        }else{
-          message.success(res.data.message)
-        }
-      })
+    Service.findFriend({ value: value.trim() }).then((res) => {
+      setFriendList(res.data.users)
+      if (res.data.users.length === 0) {
+        message.error(res.data.message)
+      } else {
+        message.success(res.data.message)
+      }
+    })
+  }
+
+  const handleAddFriend = (currentId: string): void => {
+    console.log('currentId',currentId )
+    console.log('id',id )
+    if(currentId == id){
+      message.error('不能添加自己为好友')
+      return
+    }
   }
 
   return (
     <>
       <Close windowName="friend" />
-      <Row style={{ height: '50px',padding:'10px',textAlign: 'left', fontSize: '20px', fontWeight: 'bold',color:'white',cursor:'default' }} ref={dragRef} className='background'>
+      <Row
+        style={{
+          height: '50px',
+          padding: '10px',
+          textAlign: 'left',
+          fontSize: '20px',
+          fontWeight: 'bold',
+          color: 'white',
+          cursor: 'default'
+        }}
+        ref={dragRef}
+        className="background"
+      >
         查找好友
       </Row>
       <Row style={{ padding: '20px' }}>
@@ -49,7 +75,9 @@ const AddFriend: React.FC = () => {
           />
         </Col>
         <Col span={12}>
-          <Button type="primary" onClick={handleFindFriend}>查找</Button>
+          <Button type="primary" onClick={handleFindFriend}>
+            查找
+          </Button>
         </Col>
         <Col span={24}>
           {friendList.length === 0 ? (
@@ -57,16 +85,32 @@ const AddFriend: React.FC = () => {
               没有搜索到相关结果
             </div>
           ) : (
-            <Row gutter={[16, 16]} style={{ overflowY: 'auto', height: '100%', maxHeight: 'calc(100vh - 150px)' }}>
+            <Row
+              gutter={[16, 16]}
+              style={{ overflowY: 'auto', height: '100%', maxHeight: 'calc(100vh - 150px)' }}
+            >
               {friendList.map((friend) => (
-                <Col key={friend.id} span={6} >
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px', border: '1px solid #e8e8e8', borderRadius: '4px', height: '100%' }}>
+                <Col key={friend.id} span={6}>
+                  <Card
+                    bodyStyle={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%'
+                    }}
+                  >
                     <Avatar src={friend.avatar} size={64} style={{ marginBottom: '12px' }} />
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontWeight: 'bold' }}>{friend.username}</div>
-                      <Button type="primary" style={{ marginTop: '12px' }}>添加好友</Button>
-                    </div>
-                  </div>
+                    <Typography.Text strong>{friend.username}</Typography.Text>
+                    <Typography.Text>id:{friend.id}</Typography.Text>
+                    <Button
+                      type="primary"
+                      style={{ marginTop: '12px' }}
+                      onClick={() => handleAddFriend(friend.id)}
+                    >
+                      添加好友
+                    </Button>
+                  </Card>
                 </Col>
               ))}
             </Row>

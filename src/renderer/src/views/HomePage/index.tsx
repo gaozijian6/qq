@@ -15,24 +15,20 @@ const HomePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('1')
   const [avatar, setAvatar] = useState('')
   const [isEditingIntro, setIsEditingIntro] = useState(false)
+  const [id, setId] = useState('')
 
   useEffect(() => {
     window.electron.ipcRenderer.on('login-home', (_, data) => {
-      const { introduction, username, avatar } = data
+      const { introduction, username, avatar,id } = data
       setIntroduction(introduction)
       setUsername(username)
       setAvatar(avatar || INIT_AVATAR_URL)
       setIntroduction(introduction || INIT_INTRODUCTION)
+      setId(id)
     })
   }, [])
  
   function refreshData() {
-    // Service.get('/user/info').then((res) => {
-    //   const { introduction, username, avatar } = res.data.user ?? {}
-    //   setIntroduction(introduction || INIT_INTRODUCTION)
-    //   setUsername(username)
-    //   setAvatar(avatar || INIT_AVATAR_URL)
-    // })
     Service.getUserInfo().then((res) => {
       const { introduction, username, avatar } = res.data.user ?? {}
       setIntroduction(introduction || INIT_INTRODUCTION)
@@ -42,7 +38,7 @@ const HomePage: React.FC = () => {
   }
 
   const handleAddFriend = () => {
-    window.electron.ipcRenderer.invoke('open-window', { windowName: 'friend', data: {} })
+    window.electron.ipcRenderer.invoke('open-window', { windowName: 'friend', data: {id} })
   }
 
   const handleIntroChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,7 +54,7 @@ const HomePage: React.FC = () => {
     <div
       style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#f0f2f5' }}
     >
-      <Close targetWindow="home" />
+      <Close windowName="home" />
       <Row
         ref={dragRef}
         style={{
