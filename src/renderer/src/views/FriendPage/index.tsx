@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Input, Button, message, Row, Col, Form, Avatar, Typography, Card } from 'antd'
+import { Input, Button, message, Row, Col, Avatar, Typography, Card } from 'antd'
 import * as Service from '@/service'
 import Close from '@/components/Close'
 import '@/components/gradientBG.less'
@@ -15,7 +15,7 @@ const AddFriend: React.FC = () => {
   const [value, setValue] = useState('')
   const dragRef = useDraggable('friend')
   const [friendList, setFriendList] = useState<Friend[]>([])
-  const [id, setId] = useState('')
+  const [id, setId] = useState<number>(0)
   useEffect(() => {
     window.electron.ipcRenderer.on('home-friend', (_, data) => {
       setId(data.id)
@@ -38,13 +38,20 @@ const AddFriend: React.FC = () => {
     })
   }
 
-  const handleAddFriend = (currentId: string): void => {
-    console.log('currentId',currentId )
-    console.log('id',id )
+  const handleAddFriend = (currentId: number): void => {
     if(currentId == id){
       message.error('不能添加自己为好友')
       return
     }
+    console.log(id, currentId)
+    Service.addFriend({ userIdFrom: id, userIdTo: currentId }).then((res) => {
+      console.log(res)
+      if (res.data.success) {
+        message.success(res.data.message)
+      } else {
+        message.error(res.data.message)
+      }
+    })
   }
 
   return (
@@ -106,7 +113,7 @@ const AddFriend: React.FC = () => {
                     <Button
                       type="primary"
                       style={{ marginTop: '12px' }}
-                      onClick={() => handleAddFriend(friend.id)}
+                      onClick={() => handleAddFriend(Number(friend.id))}
                     >
                       添加好友
                     </Button>

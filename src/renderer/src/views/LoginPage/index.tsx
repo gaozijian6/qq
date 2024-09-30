@@ -7,15 +7,23 @@ import * as Service from '@/service'
 import Close from '@/components/Close'
 import { INIT_AVATAR_URL, LOGIN, HOME } from '@/constants'
 
+interface FormValues {
+  id: number
+  password: string
+  remember: boolean
+}
+
 const LoginPage: React.FC = () => {
-  const [form] = Form.useForm()
+  const [form] = Form.useForm<FormValues>()
   const dragRef = useDraggable('login')
 
-  const handleLogin = (values: any) => {
+  const handleLogin = (values: FormValues) => {
+    console.log(typeof values.id)
+    return
+
     Service.login(values)
       .then((res) => {
-        console.log(res)
-        if (res.data.success == 'true') {
+        if (res.data.success) {
           message.success(res.data.message)
           const token = res.data.token
           localStorage.setItem('token', token)
@@ -48,7 +56,13 @@ const LoginPage: React.FC = () => {
           }}
         />
         <Form form={form} onFinish={handleLogin} style={{ width: '300px' }}>
-          <Form.Item name="id" rules={[{ required: true, message: '请输入您的QQ号码' }]}>
+          <Form.Item
+            name="id"
+            rules={[
+              { required: true, message: '请输入您的QQ号码' },
+              { type: 'number', message: 'QQ号码必须为数字' }
+            ]}
+          >
             <Input prefix={<UserOutlined />} placeholder="QQ号码" />
           </Form.Item>
           <Form.Item

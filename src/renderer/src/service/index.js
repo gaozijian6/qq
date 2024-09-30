@@ -19,3 +19,7 @@ export function login(params) {
 export function findFriend(params) {
   return instance.post('/findFriend', params)
 }
+
+export function addFriend(params) {
+  return instance.post('/friendRequest', params)
+}

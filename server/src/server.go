@@ -48,6 +48,9 @@ func SetupRoutes(app *fiber.App) {
 	app.Post("/findFriend", func(c *fiber.Ctx) error {
 		return routes.FindFriendRoute(c, db)
 	})
+	app.Post("/friendRequest", func(c *fiber.Ctx) error {
+		return routes.FriendRequestRoute(c, db)
+	})
 }
 
 func main() {
