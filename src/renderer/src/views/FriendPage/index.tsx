@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { Input, Button, message, Row, Col, Avatar, Typography, Card } from 'antd'
 import * as Service from '@/service'
 import Close from '@/components/Close'
-import '@/components/gradientBG.less'
+import '@/assets/gradientBG.less'
 import { useDraggable } from '@/tools/useDraggable'
+import webSocketManager from '@/tools/websocket'
 
 interface Friend {
   id: string
@@ -43,9 +44,7 @@ const AddFriend: React.FC = () => {
       message.error('不能添加自己为好友')
       return
     }
-    console.log(id, currentId)
     Service.addFriend({ userIdFrom: id, userIdTo: currentId }).then((res) => {
-      console.log(res)
       if (res.data.success) {
         message.success(res.data.message)
       } else {

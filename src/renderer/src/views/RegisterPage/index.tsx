@@ -4,7 +4,7 @@ import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons'
 import { useDraggable } from '@/tools/useDraggable'
 import * as Service from '@/service'
 import Close from '@/components/Close'
-import '@/components/gradientBG.less'
+import '@/assets/gradientBG.less'
 import { INIT_AVATAR_URL } from '@/constants'
 
 interface FormValues {

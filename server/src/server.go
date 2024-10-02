@@ -8,6 +8,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/websocket/v2"
 )
 
 var db *sql.DB
@@ -39,6 +40,7 @@ func SetupRoutes(app *fiber.App) {
 	app.Post("/login", func(c *fiber.Ctx) error {
 		return routes.LoginRoute(c, db, jwtSecret)
 	})
+	app.Use("/ws", websocket.New(routes.WebsocketConnect))
 	app.Use(func(c *fiber.Ctx) error {
 		return routes.ProtectedRoute(c, jwtSecret)
 	})

@@ -20,12 +20,12 @@ export const WINDOW: Record<string, WindowConfig> = {
   login: { width: 450, height: 340, windowName: LOGIN },
   register: { width: 450, height: 340, windowName: REGISTER },
   home: {
-    width: 300,
-    height: 700,
+    width: 930,
+    height: 740,
     windowName: HOME,
     resizable: true,
-    minWidth: 300,
-    minHeight: 700
+    minWidth: 360,
+    minHeight: 580
   },
   friend: { width: 900, height: 600, windowName: FRIEND }
 }

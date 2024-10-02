@@ -21,7 +21,23 @@ func FriendRequestRoute(c *fiber.Ctx, db *sql.DB) error {
 	userIdFrom := data["userIdFrom"].(float64)
 	userIdTo := data["userIdTo"].(float64)
 
-	_, err := db.Exec("INSERT INTO friendRequest (userIdFrom, userIdTo) VALUES (?, ?)", userIdFrom, userIdTo)
+	rows, err := db.Query("SELECT * FROM friendRequest WHERE userIdFrom = ? AND userIdTo = ?", userIdFrom, userIdTo)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "查询好友请求失败",
+		})
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		return c.JSON(fiber.Map{
+			"success": false,
+			"message": "您已添加好友，请等待好友审核",
+		})
+	}
+
+	_, err = db.Exec("INSERT INTO friendRequest (userIdFrom, userIdTo) VALUES (?, ?)", userIdFrom, userIdTo)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
