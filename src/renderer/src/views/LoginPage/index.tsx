@@ -41,7 +41,7 @@ const LoginPage: React.FC = () => {
 
   return (
     <Row justify="center" align="middle" className="background" ref={dragRef}>
-      <Close windowName="login" />
+      <Close />
       <Col>
         <Avatar
           src={INIT_AVATAR_URL}

@@ -3,6 +3,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import electronWindow from './ElectronWindow'
 import createWindow from './createWindow'
 import { LOGIN } from '../renderer/src/constants'
+import WebSocketManager from './websocket'
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
@@ -26,8 +27,18 @@ app.whenReady().then(() => {
     }
   })
 
-  ipcMain.handle('close-window', (_, windowName: string) => {
-    electronWindow.get(windowName)?.close()
+  ipcMain.handle('close-window', () => {
+    BrowserWindow.getFocusedWindow()?.close()
+    WebSocketManager.closeWebSocket()
+  })
+
+  // 初始化WebSocketManager
+  ipcMain.handle('init-websocket', (_, userId) => {
+    WebSocketManager.initWebSocket(userId)
+  })
+
+  ipcMain.handle('add-friend', (_, { userIdFrom, userIdTo }) => {
+    WebSocketManager.addFriend(userIdFrom, userIdTo)
   })
 
   createWindow(LOGIN)

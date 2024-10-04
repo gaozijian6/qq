@@ -11,12 +11,18 @@ import {
 import { useDraggable } from '@/tools/useDraggable'
 import { INIT_AVATAR_URL, INIT_INTRODUCTION } from '@/constants'
 import * as Service from '@/service'
-import webSocketManager from '@/tools/websocket'
 import ChatBox from '@/components/ChatBox'
 import { HOME, LOGIN } from '@/constants'
 
 const { Header, Sider, Content } = Layout
 const { Search } = Input
+
+interface FriendRequestItem {
+  id: number
+  username: string
+  avatar: string
+  introduction: string
+}
 
 const HomePage: React.FC = () => {
   const dragRef = useDraggable('home')
@@ -26,17 +32,19 @@ const HomePage: React.FC = () => {
   const [avatar, setAvatar] = useState('')
   const [isEditingIntro, setIsEditingIntro] = useState(false)
   const [id, setId] = useState('')
+  const [friendRequestList, setFriendRequestList] = useState<FriendRequestItem[]>([])
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
   useEffect(() => {
     window.electron.ipcRenderer.on('login-home', (_, data) => {
+      console.log('data', data)
       const { introduction, username, avatar, id } = data
       setIntroduction(introduction || INIT_INTRODUCTION)
       setUsername(username)
       setAvatar(avatar || INIT_AVATAR_URL)
       setId(id)
-      webSocketManager.initWebSocket(id?.toString())
+      window.electron.ipcRenderer.invoke('init-websocket', id.toString())
     })
 
     const handleResize = () => {
@@ -81,7 +89,7 @@ const HomePage: React.FC = () => {
   }, [windowWidth])
 
   const handleLogout = () => {
-    window.electron.ipcRenderer.invoke('close-window', HOME)
+    window.electron.ipcRenderer.invoke('close-window')
     localStorage.removeItem('token')
     window.electron.ipcRenderer.invoke('open-window', { windowName: LOGIN, data: {} })
   }

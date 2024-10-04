@@ -40,7 +40,9 @@ func SetupRoutes(app *fiber.App) {
 	app.Post("/login", func(c *fiber.Ctx) error {
 		return routes.LoginRoute(c, db, jwtSecret)
 	})
-	app.Use("/ws", websocket.New(routes.WebsocketConnect))
+	app.Use("/ws", websocket.New(func(c *websocket.Conn) {
+		routes.WebsocketConnect(c, db)
+	}))
 	app.Use(func(c *fiber.Ctx) error {
 		return routes.ProtectedRoute(c, jwtSecret)
 	})

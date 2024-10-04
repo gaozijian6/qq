@@ -20,7 +20,6 @@ func UserInfoRoute(c *fiber.Ctx, db *sql.DB, jwtSecret []byte) error {
 	}
 
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	fmt.Println(tokenString)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})

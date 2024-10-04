@@ -1,26 +1,25 @@
 package routes
 
 import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
 	"log"
-	"sync"
+	"qq-server/tools"
 
 	"github.com/gofiber/websocket/v2"
 )
 
 var clients = make(map[string]*websocket.Conn)
-var clientsMutex = sync.Mutex{}
 
-func WebsocketConnect(c *websocket.Conn) {
-	userId := c.Params("userId")
-
-	clientsMutex.Lock()
-	clients[userId] = c
-	clientsMutex.Unlock()
+func WebsocketConnect(c *websocket.Conn, db *sql.DB) {
+	var userId string
 
 	defer func() {
-		clientsMutex.Lock()
-		delete(clients, userId)
-		clientsMutex.Unlock()
+		if userId != "" {
+			log.Printf("用户 %s 断开连接，已从clients映射中移除", userId)
+			delete(clients, userId)
+		}
 		c.Close()
 	}()
 
@@ -34,22 +33,33 @@ func WebsocketConnect(c *websocket.Conn) {
 		}
 
 		if messageType == websocket.TextMessage {
-			// 处理接收到的消息
-			log.Printf("收到来自用户 %s 的消息: %s", userId, string(message))
+			var msg map[string]interface{}
+			if err := json.Unmarshal(message, &msg); err != nil {
+				log.Printf("解析消息错误: %v", err)
+				continue
+			}
 
-			// 这里可以添加消息处理逻辑
-		}
-	}
-}
+			switch msg["type"] {
+			case "onopen":
+				userId = msg["userId"].(string)
+				log.Printf("用户 %s 连接到WebSocket", userId)
+				clients[userId] = c
+			case "addFriend":
+				userIdFrom := msg["userIdFrom"].(string)
+				user, err := tools.GetUserInfo(userIdFrom, db)
+				if err != nil {
+					log.Printf("获取用户信息失败: %v", err)
+					continue
+				}
 
-func SendWebsocketMessage(userId string, message []byte) {
-	clientsMutex.Lock()
-	defer clientsMutex.Unlock()
-
-	if client, ok := clients[userId]; ok {
-		err := client.WriteMessage(websocket.TextMessage, message)
-		if err != nil {
-			log.Printf("发送WebSocket消息错误: %v", err)
+				userIdTo := msg["userIdTo"].(string)
+				fmt.Println("user", user)
+				if clients[userIdTo] != nil {
+					jsonUser, _ := json.Marshal(user)
+					fmt.Println("jsonUser", jsonUser)
+					clients[userIdTo].WriteMessage(websocket.TextMessage, jsonUser)
+				}
+			}
 		}
 	}
 }

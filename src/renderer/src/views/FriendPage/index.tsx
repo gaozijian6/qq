@@ -4,7 +4,6 @@ import * as Service from '@/service'
 import Close from '@/components/Close'
 import '@/assets/gradientBG.less'
 import { useDraggable } from '@/tools/useDraggable'
-import webSocketManager from '@/tools/websocket'
 
 interface Friend {
   id: string
@@ -47,6 +46,10 @@ const AddFriend: React.FC = () => {
     Service.addFriend({ userIdFrom: id, userIdTo: currentId }).then((res) => {
       if (res.data.success) {
         message.success(res.data.message)
+        window.electron.ipcRenderer.invoke('add-friend', {
+          userIdFrom: id.toString(),
+          userIdTo: currentId.toString()
+        })
       } else {
         message.error(res.data.message)
       }
@@ -55,7 +58,7 @@ const AddFriend: React.FC = () => {
 
   return (
     <>
-      <Close windowName="friend" />
+      <Close />
       <Row
         style={{
           height: '50px',

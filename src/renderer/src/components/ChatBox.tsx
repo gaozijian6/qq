@@ -3,6 +3,7 @@ import { Layout, Input, Button, List, Avatar, Typography, Row, Popover } from 'a
 import { SendOutlined, SmileOutlined } from '@ant-design/icons'
 import { useDraggable } from '@/tools/useDraggable'
 import EmojiPanel from '@/components/EmojiPanel'
+import Close from './Close'
 
 const { Header, Content, Footer } = Layout
 const { TextArea } = Input
@@ -97,6 +98,7 @@ const ChatBox: React.FC = () => {
 
   return (
     <Layout style={{ height: '100%', backgroundColor: '#e7edff' }}>
+      <Close />
       <Header style={{ backgroundColor: '#e7edff', borderBottom: '1px solid #e8e8e8' }} ref={dragRef}>
         <Text strong>物理-地质19-1234 (119)</Text>
       </Header>

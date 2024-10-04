@@ -39,7 +39,7 @@ const RegisterPage: React.FC = () => {
 
   return (
     <Row justify="center" align="middle" className="background" ref={dragRef}>
-      <Close windowName="register" />
+      <Close />
       <Col>
         <Form form={form} onFinish={handleRegister} style={{ width: '300px' }}>
           <Form.Item name="avatar" initialValue={avatar} style={{ display: 'none' }}>
