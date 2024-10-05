@@ -5,10 +5,11 @@ import (
 )
 
 type UserInfo struct {
-	ID           string `json:"id"`
-	Username     string `json:"username"`
-	Avatar       string `json:"avatar"`
-	Introduction string `json:"introduction"`
+	ID           string   `json:"id"`
+	Username     string   `json:"username"`
+	Avatar       string   `json:"avatar"`
+	Introduction string   `json:"introduction"`
+	FriendList   []string `json:"friendList"`
 }
 
 func GetUserInfo(userID string, db *sql.DB) (UserInfo, error) {

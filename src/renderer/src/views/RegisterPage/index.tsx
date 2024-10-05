@@ -6,7 +6,7 @@ import * as Service from '@/service'
 import Close from '@/components/Close'
 import '@/assets/gradientBG.less'
 import { INIT_AVATAR_URL } from '@/constants'
-
+import Minimize from '@/components/Minimize'
 interface FormValues {
   username: string
   email: string
@@ -34,11 +34,12 @@ const RegisterPage: React.FC = () => {
 
   const handleModalOk = () => {
     setIsModalVisible(false)
-    window.electron.ipcRenderer.invoke('close-window', 'register')
+    window.electron.ipcRenderer.invoke('hide-window', 'register')
   }
 
   return (
     <Row justify="center" align="middle" className="background" ref={dragRef}>
+      <Minimize />
       <Close />
       <Col>
         <Form form={form} onFinish={handleRegister} style={{ width: '300px' }}>

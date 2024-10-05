@@ -1,7 +1,11 @@
 import React from 'react';
 import { CloseOutlined } from '@ant-design/icons';
 
-const Close: React.FC = () => {
+interface CloseProps {
+  isExit?: boolean
+}
+
+const Close: React.FC<CloseProps> = ({ isExit = false }) => {
   return (
     <div
       style={{
@@ -12,7 +16,11 @@ const Close: React.FC = () => {
         zIndex: 1000
       }}
       onClick={() => {
-        window.electron.ipcRenderer.invoke('close-window')
+        if (isExit) {
+          window.electron.ipcRenderer.invoke('exit-app')
+        } else {
+          window.electron.ipcRenderer.invoke('hide-window')
+        }
       }}
     >
       <CloseOutlined style={{ fontSize: '16px', color: '#fff' }} />

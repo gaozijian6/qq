@@ -9,16 +9,15 @@ import {
   LogoutOutlined
 } from '@ant-design/icons'
 import { useDraggable } from '@/tools/useDraggable'
-import { INIT_AVATAR_URL, INIT_INTRODUCTION } from '@/constants'
+import { FRIEND, INIT_AVATAR_URL, INIT_INTRODUCTION } from '@/constants'
 import * as Service from '@/service'
 import ChatBox from '@/components/ChatBox'
-import { HOME, LOGIN } from '@/constants'
-
+import Detail from '@/components/Detail'
 const { Header, Sider, Content } = Layout
 const { Search } = Input
 
 interface FriendRequestItem {
-  id: number
+  id: string
   username: string
   avatar: string
   introduction: string
@@ -33,18 +32,27 @@ const HomePage: React.FC = () => {
   const [isEditingIntro, setIsEditingIntro] = useState(false)
   const [id, setId] = useState('')
   const [friendRequestList, setFriendRequestList] = useState<FriendRequestItem[]>([])
-
+  const [friendList, setFriendList] = useState<FriendRequestItem[]>([])
+  const [selectedFriend, setSelectedFriend] = useState<FriendRequestItem | null>(null)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+  // 1 消息 2 好友
+  const [type1, setType1] = useState(1)
+  // 1 空白 2 好友详情 3 聊天
+  const [type2, setType2] = useState(1)
+  const [clickTimer, setClickTimer] = useState<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     window.electron.ipcRenderer.on('login-home', (_, data) => {
-      console.log('data', data)
-      const { introduction, username, avatar, id } = data
+      const { introduction, username, avatar, id, friends } = data
       setIntroduction(introduction || INIT_INTRODUCTION)
       setUsername(username)
       setAvatar(avatar || INIT_AVATAR_URL)
       setId(id)
-      window.electron.ipcRenderer.invoke('init-websocket', id.toString())
+      setFriendList(friends)
+    })
+
+    window.electron.ipcRenderer.on('newFriendRequest', (_, data) => {
+      setFriendRequestList((prevList) => [...prevList, data])
     })
 
     const handleResize = () => {
@@ -70,7 +78,7 @@ const HomePage: React.FC = () => {
   }
 
   const handleAddFriend = () => {
-    window.electron.ipcRenderer.invoke('open-window', { windowName: 'friend', data: { id } })
+    window.electron.ipcRenderer.invoke('open-window', { windowName: FRIEND, data: { id } })
   }
 
   const handleIntroChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,9 +97,8 @@ const HomePage: React.FC = () => {
   }, [windowWidth])
 
   const handleLogout = () => {
-    window.electron.ipcRenderer.invoke('close-window')
+    window.electron.ipcRenderer.invoke('logout')
     localStorage.removeItem('token')
-    window.electron.ipcRenderer.invoke('open-window', { windowName: LOGIN, data: {} })
   }
 
   const settingsMenu = {
@@ -103,6 +110,21 @@ const HomePage: React.FC = () => {
         onClick: handleLogout
       }
     ]
+  }
+
+  const handleItemClick = (item: FriendRequestItem) => {
+    setSelectedFriend(item)
+    if (clickTimer) {
+      clearTimeout(clickTimer)
+      setClickTimer(null)
+      setType2(3)
+    } else {
+      const timer = setTimeout(() => {
+        setType2(2)
+        setClickTimer(null)
+      }, 200)
+      setClickTimer(timer)
+    }
   }
 
   return (
@@ -133,14 +155,16 @@ const HomePage: React.FC = () => {
           <Menu.Item
             key="message"
             icon={<MessageOutlined />}
+            onClick={() => setType1(1)}
             style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
           />
           <Menu.Item
             key="contacts"
             icon={<TeamOutlined />}
+            onClick={() => setType1(2)}
             style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
           />
-          <Dropdown menu={settingsMenu} placement="right" trigger={['click']}>
+          <Dropdown menu={settingsMenu} placement="topRight" trigger={['click']}>
             <Menu.Item
               key="setting"
               icon={<SettingOutlined />}
@@ -168,16 +192,39 @@ const HomePage: React.FC = () => {
               icon={<PlusCircleOutlined />}
             />
           </Header>
-          {windowWidth < 770 && (
-            <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
-              {/* 这里可以添加小屏幕时需要显示的内容 */}
-            </Content>
-          )}
+          <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
+            {type1 === 1 && friendRequestList?.map((item) => (
+              <div
+                key={item.id}
+                style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}
+              >
+                <Avatar src={item.avatar} />
+                <span style={{ fontWeight: 'bold', color: '#1890ff', marginLeft: '10px' }}>
+                  {item.username}
+                </span>
+                <span style={{ marginLeft: '5px', color: '#666' }}>请求添加你为好友</span>
+              </div>
+            ))}
+            {type1 === 2 && friendList?.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => handleItemClick(item)}
+                style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}
+              >
+                <Avatar src={item.avatar} />
+                <span style={{ fontWeight: 'bold', color: '#1890ff', marginLeft: '10px' }}>
+                  {item.username}
+                </span>
+              </div>
+            ))}
+          </Content>
         </Sider>
 
         {windowWidth >= 580 && (
           <Content style={{ overflow: 'initial', minWidth: 330 }}>
-            <ChatBox />
+            {type2 === 1 && <div style={{ height: '100%' }} />}
+            {type2 === 2 && <Detail />}
+            {type2 === 3 && selectedFriend?.id && <ChatBox {...selectedFriend} />}
           </Content>
         )}
       </Layout>

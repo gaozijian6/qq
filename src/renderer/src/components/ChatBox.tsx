@@ -4,41 +4,24 @@ import { SendOutlined, SmileOutlined } from '@ant-design/icons'
 import { useDraggable } from '@/tools/useDraggable'
 import EmojiPanel from '@/components/EmojiPanel'
 import Close from './Close'
-
+import Minimize from '@/components/Minimize'
 const { Header, Content, Footer } = Layout
 const { TextArea } = Input
 const { Text } = Typography
 
-interface Message {
-  sender: string
-  content: string
+interface ChatBoxProps {
+  id: string
+  username: string
   avatar: string
+  introduction: string
 }
 
-const ChatBox: React.FC = () => {
+const ChatBox: React.FC<ChatBoxProps> = ({id, username, avatar, introduction}) => {
   const dragRef = useDraggable('home')
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      sender: '熊猫',
-      content: '[暂不支持该消息类型,请在手机QQ查看]',
-      avatar: 'https://example.com/avatar1.png'
-    },
-    { sender: '奇先生A1', content: '这是个全新的,yyd!!', avatar: 'https://example.com/avatar2.png' }
-  ])
   const [inputMessage, setInputMessage] = useState('')
   const [emojiPanelVisible, setEmojiPanelVisible] = useState(false)
   const [cursorPosition, setCursorPosition] = useState<number | null>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
-
-  const handleSend = () => {
-    if (inputMessage.trim()) {
-      setMessages([
-        ...messages,
-        { sender: '我', content: inputMessage, avatar: 'https://example.com/myavatar.png' }
-      ])
-      setInputMessage('')
-    }
-  }
 
   const handleEmojiClick = (emoji: string) => {
     if (cursorPosition !== null && textAreaRef.current) {
@@ -98,9 +81,12 @@ const ChatBox: React.FC = () => {
 
   return (
     <Layout style={{ height: '100%', backgroundColor: '#e7edff' }}>
+      <Minimize />
       <Close />
       <Header style={{ backgroundColor: '#e7edff', borderBottom: '1px solid #e8e8e8' }} ref={dragRef}>
-        <Text strong>物理-地质19-1234 (119)</Text>
+        <Avatar src={avatar} />
+        <Text strong>{username} ({id})</Text>
+        <Text>{introduction}</Text>
       </Header>
       <Content
         style={{
@@ -109,20 +95,6 @@ const ChatBox: React.FC = () => {
           height: `calc(100% - ${footerHeight}px - 64px)`
         }}
       >
-        <List
-          itemLayout="horizontal"
-          dataSource={messages}
-          renderItem={(item) => (
-            <List.Item style={{ padding: '8px 0' }}>
-              <List.Item.Meta
-                avatar={<Avatar src={item.avatar} />}
-                title={item.sender}
-                description={item.content}
-                style={{ alignItems: 'flex-start' }}
-              />
-            </List.Item>
-          )}
-        />
       </Content>
       <Footer
         ref={footerRef}
@@ -179,7 +151,6 @@ const ChatBox: React.FC = () => {
           <Button
             type="primary"
             icon={<SendOutlined />}
-            onClick={handleSend}
             style={{ marginLeft: 'auto' }}
           >
             发送

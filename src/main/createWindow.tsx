@@ -17,10 +17,14 @@ export default function createWindow(windowName: string, data?: any): BrowserWin
     resizable,
     minWidth,
     minHeight,
+    icon:
+      windowName === HOME
+        ? join(__dirname, '../../resources/icon.png')
+        : join(__dirname, '../../resources/cry.png'),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
-      webSecurity: false,
+      webSecurity: false
     }
   })
 

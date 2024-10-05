@@ -2,25 +2,25 @@ package routes
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func FriendRequestRoute(c *fiber.Ctx, db *sql.DB) error {
-	data := map[string]interface{}{
-		"userIdFrom": 0,
-		"userIdTo":   0,
+	var request struct {
+		UserIdFrom string `json:"userIdFrom"`
+		UserIdTo   string `json:"userIdTo"`
 	}
-	if err := c.BodyParser(&data); err != nil {
+	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
 			"message": "无效的请求数据",
 		})
 	}
 
-	userIdFrom := data["userIdFrom"].(float64)
-	userIdTo := data["userIdTo"].(float64)
-
+	userIdFrom, userIdTo := request.UserIdFrom, request.UserIdTo
+	fmt.Println(userIdFrom, userIdTo)
 	rows, err := db.Query("SELECT * FROM friendRequest WHERE userIdFrom = ? AND userIdTo = ?", userIdFrom, userIdTo)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

@@ -1,4 +1,6 @@
 import WebSocket from 'ws'
+import electronWindow from './ElectronWindow'
+import { HOME } from '../renderer/src/constants'
 
 export class WebSocketManager {
   private static instance: WebSocketManager | null = null
@@ -29,9 +31,13 @@ export class WebSocketManager {
       }
 
       this.socket.onmessage = (event) => {
-        console.log(event.data)
         const data = JSON.parse(event.data.toString())
-        console.log('收到服务器消息:', data)
+        if (data.type === 'newFriendRequest') {
+          console.log(electronWindow.map)
+
+          console.log('收到服务器消息:', data)
+          electronWindow.get(HOME)?.webContents.send('newFriendRequest', data.user)
+        }
       }
 
       this.socket.onclose = () => {
@@ -51,7 +57,10 @@ export class WebSocketManager {
   }
 
   public closeWebSocket(): void {
+    console.log(1)
+
     if (this.socket) {
+      console.log(2)
       this.socket.close()
       this.socket = null
     }

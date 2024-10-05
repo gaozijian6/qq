@@ -5,8 +5,8 @@ import { useDraggable } from '@/tools/useDraggable'
 import '@/assets/gradientBG.less'
 import * as Service from '@/service'
 import Close from '@/components/Close'
-import { INIT_AVATAR_URL, LOGIN, HOME } from '@/constants'
-
+import { INIT_AVATAR_URL } from '@/constants'
+import Minimize from '@/components/Minimize'
 interface FormValues {
   id: number
   password: string
@@ -24,12 +24,7 @@ const LoginPage: React.FC = () => {
           message.success(res.data.message)
           const token = res.data.token
           localStorage.setItem('token', token)
-          // 发送数据到主进程
-          window.electron.ipcRenderer.invoke('open-window', {
-            windowName: HOME,
-            data: res.data.user
-          })
-          window.electron.ipcRenderer.invoke('close-window', LOGIN)
+          window.electron.ipcRenderer.invoke('login-success', res.data.user)
         } else {
           message.error(res.data.message)
         }
@@ -41,7 +36,8 @@ const LoginPage: React.FC = () => {
 
   return (
     <Row justify="center" align="middle" className="background" ref={dragRef}>
-      <Close />
+      <Minimize />
+      <Close isExit={true} />
       <Col>
         <Avatar
           src={INIT_AVATAR_URL}

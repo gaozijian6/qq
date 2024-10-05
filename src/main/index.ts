@@ -1,9 +1,27 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import electronWindow from './ElectronWindow'
 import createWindow from './createWindow'
-import { LOGIN } from '../renderer/src/constants'
+import { HOME, LOGIN } from '../renderer/src/constants'
 import WebSocketManager from './websocket'
+import path from 'path'
+
+// 读取环境变量并设置不同的 userData 路径
+const customUserDataDir = process.env.USER_DATA_DIR || 'default'
+const userDataPath = path.join(app.getPath('userData'), customUserDataDir.trim()) // 使用 trim 去除多余空格
+app.setPath('userData', userDataPath)
+
+let tray: Tray | null = null
+let isLoggedIn = false
+
+function updateTrayIcon() {
+  if (tray) {
+    const iconPath = isLoggedIn
+      ? path.join(__dirname, '../../resources/icon.png')
+      : path.join(__dirname, '../../resources/cry.png')
+    tray.setImage(iconPath)
+  }
+}
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
@@ -27,9 +45,24 @@ app.whenReady().then(() => {
     }
   })
 
-  ipcMain.handle('close-window', () => {
-    BrowserWindow.getFocusedWindow()?.close()
+  ipcMain.handle('hide-window', () => {
+    BrowserWindow.getFocusedWindow()?.hide()
+  })
+
+  ipcMain.handle('exit-app', () => {
+    app.quit()
+  })
+
+  ipcMain.handle('minimize-window', () => {
+    BrowserWindow.getFocusedWindow()?.minimize()
+  })
+
+  ipcMain.handle('logout', () => {
     WebSocketManager.closeWebSocket()
+    isLoggedIn = false
+    updateTrayIcon()
+    BrowserWindow.getFocusedWindow()?.close()
+    createWindow(LOGIN)
   })
 
   // 初始化WebSocketManager
@@ -47,10 +80,51 @@ app.whenReady().then(() => {
       createWindow(LOGIN)
     }
   })
-})
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  // 创建系统托盘
+  tray = new Tray(path.join(__dirname, '../../resources/cry.png'))
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: '显示主窗口',
+      click: () => {
+        if (isLoggedIn) {
+          electronWindow.get(HOME)?.show()
+        } else {
+          electronWindow.get(LOGIN)?.show()
+        }
+      }
+    },
+    { label: '退出', click: () => app.quit() }
+  ])
+  tray.setToolTip('qq模拟器')
+  tray.setContextMenu(contextMenu)
+
+  // 单击托盘图标时打开窗口
+  tray.on('click', () => {
+    if (isLoggedIn) {
+      electronWindow.get(HOME)?.show()
+    } else {
+      electronWindow.get(LOGIN)?.show()
+    }
+  })
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+      app.quit()
+    }
+  })
+
+  app.on('before-quit', () => {
+    tray?.destroy()
+    tray = null
+  })
+
+  ipcMain.handle('login-success', (_, user) => {
+    console.log(user)
+    WebSocketManager.initWebSocket(user.id.toString())
+    BrowserWindow.getFocusedWindow()?.close()
+    createWindow(HOME, user)
+    isLoggedIn = true
+    updateTrayIcon()
+  })
 })

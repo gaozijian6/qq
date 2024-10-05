@@ -2,8 +2,6 @@ package routes
 
 import (
 	"database/sql"
-	"fmt"
-	"reflect"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -41,7 +39,6 @@ func FindFriendRoute(c *fiber.Ctx, db *sql.DB) error {
 	for rows.Next() {
 		var user friendUserList
 		err := rows.Scan(&user.ID, &user.Avatar, &user.Username)
-		fmt.Println(reflect.TypeOf(user.ID))
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"success": false,

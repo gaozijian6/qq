@@ -3,7 +3,6 @@ package routes
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"qq-server/tools"
 
@@ -53,10 +52,12 @@ func WebsocketConnect(c *websocket.Conn, db *sql.DB) {
 				}
 
 				userIdTo := msg["userIdTo"].(string)
-				fmt.Println("user", user)
 				if clients[userIdTo] != nil {
-					jsonUser, _ := json.Marshal(user)
-					fmt.Println("jsonUser", jsonUser)
+					userWithType := map[string]interface{}{
+						"type": "newFriendRequest",
+						"user": user,
+					}
+					jsonUser, _ := json.Marshal(userWithType)
 					clients[userIdTo].WriteMessage(websocket.TextMessage, jsonUser)
 				}
 			}

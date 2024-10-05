@@ -42,7 +42,6 @@ func UserInfoRoute(c *fiber.Ctx, db *sql.DB, jwtSecret []byte) error {
 	}
 
 	userID, ok := claims["userID"].(float64)
-	fmt.Println(userID)
 	if !ok {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,

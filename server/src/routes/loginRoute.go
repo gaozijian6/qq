@@ -75,6 +75,38 @@ func LoginRoute(c *fiber.Ctx, db *sql.DB, jwtSecret []byte) error {
 		})
 	}
 
+	// 获取好友列表
+	rows, err := db.Query("SELECT u.id, u.avatar, u.username, u.introduction FROM friends f JOIN users u ON (f.userId1 = u.id OR f.userId2 = u.id) WHERE (f.userId1 = ? OR f.userId2 = ?) AND u.id != ?", userID, userID, userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": "获取好友列表时发生错误",
+			"error":   err.Error(),
+		})
+	}
+	defer rows.Close()
+
+	var friends []fiber.Map
+	for rows.Next() {
+		var friend fiber.Map
+		var id, avatar, username, introduction string
+		err := rows.Scan(&id, &avatar, &username, &introduction)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"success": false,
+				"message": "处理好友数据时发生错误",
+				"error":   err.Error(),
+			})
+		}
+		friend = fiber.Map{
+			"id":           id,
+			"avatar":       avatar,
+			"username":     username,
+			"introduction": introduction,
+		}
+		friends = append(friends, friend)
+	}
+
 	// 登录成功
 	return c.JSON(fiber.Map{
 		"success": true,
@@ -85,6 +117,7 @@ func LoginRoute(c *fiber.Ctx, db *sql.DB, jwtSecret []byte) error {
 			"username":     user.Username,
 			"introduction": user.Introduction,
 			"avatar":       user.Avatar,
+			"friends":      friends,
 		},
 	})
 }

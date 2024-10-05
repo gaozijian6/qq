@@ -1,6 +1,6 @@
 class ElectronWindow {
   static instance: ElectronWindow | null = null
-  map = new Map()
+  public map = new Map()
 
   constructor() {
     if (ElectronWindow.instance) {

@@ -4,6 +4,7 @@ import * as Service from '@/service'
 import Close from '@/components/Close'
 import '@/assets/gradientBG.less'
 import { useDraggable } from '@/tools/useDraggable'
+import Minimize from '@/components/Minimize'
 
 interface Friend {
   id: string
@@ -39,25 +40,27 @@ const AddFriend: React.FC = () => {
   }
 
   const handleAddFriend = (currentId: number): void => {
-    if(currentId == id){
+    if (currentId === id) {
       message.error('不能添加自己为好友')
       return
     }
-    Service.addFriend({ userIdFrom: id, userIdTo: currentId }).then((res) => {
-      if (res.data.success) {
+    console.log(id, currentId)
+    Service.addFriend({ userIdFrom: id.toString(), userIdTo: currentId.toString() }).then((res) => {
+      if (res.data?.success) {
         message.success(res.data.message)
         window.electron.ipcRenderer.invoke('add-friend', {
           userIdFrom: id.toString(),
           userIdTo: currentId.toString()
         })
       } else {
-        message.error(res.data.message)
+        message.error(res.data?.message ?? '添加好友失败')
       }
     })
   }
 
   return (
     <>
+      <Minimize />
       <Close />
       <Row
         style={{
